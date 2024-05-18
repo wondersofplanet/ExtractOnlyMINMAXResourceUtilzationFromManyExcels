@@ -4,6 +4,7 @@ Sub aaaCombinedGenerateResourceUtilization()
    CopyPastePatternDataInSAMEsheet2
    CopyDataAcolumnToSheet3
    CopyDataTOBCDcolumn
+   RemoveEXTRATextAndFormatting
 End Sub
 
 Sub CopyDataFromOtherExcels()
@@ -237,4 +238,16 @@ Sub CopyDataTOBCDcolumn()
     MsgBox "Data copied successfully!", vbInformation
 End Sub
 
-
+Sub RemoveEXTRATextAndFormatting()
+    Dim lastRow As Long
+    Dim cell As Range
+    
+    ' Find the last row with data in column A of Sheet3
+    lastRow = Sheets("Sheet3").Cells(Rows.Count, "A").End(xlUp).Row
+    
+    ' Loop through each cell in column A and remove text and formatting
+    For Each cell In Sheets("Sheet3").Range("A1:A" & lastRow)
+        cell.Value = Replace(cell.Value, "Server - Resource Utilization", "")
+        cell.ClearFormats ' Remove formatting
+    Next cell
+End Sub
