@@ -1,0 +1,240 @@
+Sub aaaCombinedGenerateResourceUtilization()
+   CopyDataFromOtherExcels
+   CopyDataToSheet2
+   CopyPastePatternDataInSAMEsheet2
+   CopyDataAcolumnToSheet3
+   CopyDataTOBCDcolumn
+End Sub
+
+Sub CopyDataFromOtherExcels()
+
+    Dim currentWB As Workbook
+    Dim currentWS As Worksheet
+    Dim currentPath As String
+    Dim currentFile As String
+    Dim dataRange As Range
+    Dim targetCell As Range
+    Dim cell As Range
+    Dim rowCount As Long
+    Dim colCount As Long
+    Dim sourceRowOffset As Long
+    Dim sourceColOffset As Long
+    Dim targetRowOffset As Long
+    Dim targetColOffset As Long
+    Dim lastRow As Long
+    Dim lastColumn As Long
+    Dim nextAvailableRow As Long
+    Dim copyWithFormat As Boolean
+    
+    On Error GoTo ErrorHandler
+    
+    ' Set flag to determine whether to copy with formatting
+    copyWithFormat = True ' Change to False to disable copying with formatting
+    
+    ' Set current workbook and worksheet
+    Set currentWB = ThisWorkbook
+    Set currentWS = Worksheets("Sheet1")
+    currentWS.Cells.Clear
+    ' Set current directory path
+    currentPath = ThisWorkbook.Path
+    
+    ' Find next available row and column in current worksheet
+    lastRow = currentWS.Cells(currentWS.Rows.Count, "A").End(xlUp).Row
+    lastColumn = currentWS.Cells(1, currentWS.Columns.Count).End(xlToLeft).Column
+    
+    ' Calculate the next available row
+    If lastRow = 1 And lastColumn = 1 And IsEmpty(currentWS.Cells(1, 1)) Then
+        nextAvailableRow = 1
+    Else
+        nextAvailableRow = lastRow + 1
+    End If
+    
+    ' Set target cell
+    Set targetCell = currentWS.Cells(nextAvailableRow, "A")
+    
+ 
+    ' Loop through Excel files in current directory
+    currentFile = Dir(currentPath & "\*.xls*")
+    Do While currentFile <> ""
+        ' Skip the current workbook
+        If currentFile <> currentWB.Name Then
+            ' Open the workbook
+            Workbooks.Open Filename:=currentPath & "\" & currentFile
+            ' Set data range from the specified cells
+            Set dataRange = Workbooks(currentFile).ActiveSheet.Range("A1,A4,A5,C2,C3,D3,C4,D4,D5,C5,C6")
+            
+            ' Check if data range is empty
+            If Not dataRange Is Nothing Then
+                ' Get the size of the data range
+                rowCount = dataRange.Rows.Count
+                colCount = dataRange.Columns.Count
+                
+                ' Calculate row and column offsets for the target range
+                sourceRowOffset = dataRange.Cells(1).Row - 1
+                sourceColOffset = dataRange.Cells(1).Column - 1
+                targetRowOffset = targetCell.Row - 1
+                targetColOffset = targetCell.Column - 1
+                
+                ' Copy data to target range
+                For Each cell In dataRange
+                    currentWS.Cells(cell.Row + targetRowOffset - sourceRowOffset, cell.Column + targetColOffset - sourceColOffset).Value = cell.Value
+                    If copyWithFormat Then
+                        ' Copy formatting
+                        cell.Copy
+                        currentWS.Cells(cell.Row + targetRowOffset - sourceRowOffset, cell.Column + targetColOffset - sourceColOffset).PasteSpecial Paste:=xlPasteFormats
+                        ' Copy color
+                        currentWS.Cells(cell.Row + targetRowOffset - sourceRowOffset, cell.Column + targetColOffset - sourceColOffset).Interior.Color = cell.Interior.Color
+                    End If
+                Next cell
+                
+                ' Move target cell to the next available position
+                Set targetCell = currentWS.Cells(nextAvailableRow + rowCount, "A")
+            End If
+            
+            ' Close the opened workbook without saving changes
+            Workbooks(currentFile).Close SaveChanges:=False
+            
+            ' Calculate the next available row for the next iteration
+            nextAvailableRow = currentWS.Cells(currentWS.Rows.Count, "A").End(xlUp).Row + 2 ' Add an extra row for an empty line
+            ' Set target cell for the next iteration
+            Set targetCell = currentWS.Cells(nextAvailableRow, "A")
+        End If
+        ' Move to the next file
+        currentFile = Dir
+    Loop
+    
+    ' Autofit columns
+    currentWS.Columns.AutoFit
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "An error occurred: " & Err.Description, vbExclamation
+End Sub
+
+
+
+
+
+Sub CopyDataToSheet2()
+    Dim ws1 As Worksheet
+    Dim ws2 As Worksheet
+    Dim lastRow As Long
+    
+    'Check if Sheet2 exists, if not create it
+    On Error Resume Next
+    Set ws2 = Worksheets("Sheet2")
+    ws2.Cells.Clear
+    On Error GoTo 0
+    
+    If ws2 Is Nothing Then
+        'Sheet2 does not exist, create it
+        Set ws2 = Worksheets.Add
+        ws2.Name = "Sheet2"
+    End If
+    
+    'Set reference to Sheet1
+    Set ws1 = ThisWorkbook.Worksheets("Sheet1")
+    
+    'Find the last row with data in Sheet1
+    lastRow = ws1.Cells(ws1.Rows.Count, "A").End(xlUp).Row
+    
+    'Copy data from Sheet1 to Sheet2
+    ws1.Range("A1:Z" & lastRow).Copy Destination:=ws2.Range("A1")
+    'Autofit all rows in Sheet2
+    ws2.Columns.AutoFit
+    'Inform the user
+    MsgBox "Data copied from Sheet1 to Sheet2 successfully!", vbInformation
+End Sub
+
+Sub CopyPastePatternDataInSAMEsheet2()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    
+    ' Set the worksheet
+    Set ws = ThisWorkbook.Sheets("Sheet2")
+    
+    ' Find the last row with data
+    lastRow = ws.Cells(ws.Rows.Count, "C").End(xlUp).Row
+    
+    ' Loop through the rows and copy paste data
+    For i = 5 To lastRow Step 6
+        ' Copy data from C5 and D5 to E4 and F4
+        ws.Range("C" & i & ":D" & i).Copy
+        ws.Range("E" & i - 1 & ":F" & i - 1).PasteSpecial Paste:=xlPasteValues
+        
+        ' Copy data from C11 and D11 to F10 and D10
+        ws.Range("C" & i + 6 & ":D" & i + 6).Copy
+        ws.Range("F" & i + 5 & ":D" & i + 5).PasteSpecial Paste:=xlPasteValues
+        
+        ' Clear the clipboard
+        Application.CutCopyMode = False
+    Next i
+End Sub
+
+
+Sub CopyDataAcolumnToSheet3()
+    Dim ws2 As Worksheet
+    Dim ws3 As Worksheet
+    Dim lastRow As Long
+    Dim i As Long, j As Long
+  
+    
+    ' Check if Sheet3 exists, if not, create it
+    On Error Resume Next
+    Set ws3 = Worksheets("Sheet3")
+    On Error GoTo 0
+    
+    If ws3 Is Nothing Then
+        Set ws3 = ThisWorkbook.Sheets.Add(After:= _
+                 ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        ws3.Name = "Sheet3"
+    End If
+      ws3.Cells.Clear
+    ' Copy data from Sheet2 to Sheet3
+    Set ws2 = ThisWorkbook.Sheets("Sheet2")
+    lastRow = ws2.Cells(ws2.Rows.Count, "A").End(xlUp).Row
+    
+    j = 1 ' Counter for rows in Sheet3
+    For i = 1 To lastRow Step 6 ' Start from row 1, copy every 6th row
+        ws2.Cells(i, 1).Copy ws3.Cells(j, 1)
+        j = j + 1
+    Next i
+    
+   ' MsgBox "Data copied successfully from Sheet2 to Sheet3.", vbInformation
+End Sub
+
+
+Sub CopyDataTOBCDcolumn()
+    Dim sourceSheet As Worksheet
+    Dim destSheet As Worksheet
+    Dim i As Integer
+    Dim sourceRow As Integer
+    Dim destRow As Integer
+    
+    ' Set the source and destination sheets
+    Set sourceSheet = ThisWorkbook.Sheets("Sheet2")
+    Set destSheet = ThisWorkbook.Sheets("Sheet3")
+    
+    ' Initialize the destination row
+    destRow = 1
+    
+    ' Loop through the rows in Sheet2 and copy data to Sheet3
+    For i = 4 To sourceSheet.Cells(Rows.Count, "C").End(xlUp).Row Step 6
+        ' Determine the source row
+        sourceRow = i
+        
+        ' Copy data from Sheet2 to Sheet3
+        destSheet.Cells(destRow, 2).Resize(1, 4).Value = sourceSheet.Cells(sourceRow, 3).Resize(1, 4).Value
+        
+        ' Increment the destination row
+        destRow = destRow + 1
+    Next i
+    'Autofit all rows in Sheet2
+    destSheet.Columns.AutoFit
+    ' Notify user that data has been copied
+    MsgBox "Data copied successfully!", vbInformation
+End Sub
+
+
