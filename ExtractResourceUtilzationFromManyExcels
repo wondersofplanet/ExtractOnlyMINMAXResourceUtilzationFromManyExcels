@@ -1,10 +1,17 @@
 Sub aaaCombinedGenerateResourceUtilization()
    CopyDataFromOtherExcels
    CopyDataToSheet2
+   Application.Wait Now + TimeValue("00:00:01")
    CopyPastePatternDataInSAMEsheet2
    CopyDataAcolumnToSheet3
+   Application.Wait Now + TimeValue("00:00:01")
    CopyDataTOBCDcolumn
+   Application.Wait Now + TimeValue("00:00:01")
    RemoveEXTRATextAndFormatting
+   Application.Wait Now + TimeValue("00:00:01")
+   InsertRowsAtBeginningInSheet3
+   Application.Wait Now + TimeValue("00:00:01")
+   AddTemplateHeadersInSheet3
 End Sub
 
 Sub CopyDataFromOtherExcels()
@@ -145,7 +152,7 @@ Sub CopyDataToSheet2()
     'Autofit all rows in Sheet2
     ws2.Columns.AutoFit
     'Inform the user
-    MsgBox "Data copied from Sheet1 to Sheet2 successfully!", vbInformation
+    'MsgBox "Data copied from Sheet1 to Sheet2 successfully!", vbInformation
 End Sub
 
 Sub CopyPastePatternDataInSAMEsheet2()
@@ -235,7 +242,7 @@ Sub CopyDataTOBCDcolumn()
     'Autofit all rows in Sheet2
     destSheet.Columns.AutoFit
     ' Notify user that data has been copied
-    MsgBox "Data copied successfully!", vbInformation
+    'MsgBox "Data copied successfully!", vbInformation
 End Sub
 
 Sub RemoveEXTRATextAndFormatting()
@@ -250,4 +257,97 @@ Sub RemoveEXTRATextAndFormatting()
         cell.Value = Replace(cell.Value, "Server - Resource Utilization", "")
         cell.ClearFormats ' Remove formatting
     Next cell
+End Sub
+Sub AddTemplateHeadersInSheet3()
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("Sheet3") ' Adjust if you want to target a specific sheet
+    
+    ' Set headers
+    ws.Range("A1:E1").Merge
+    ws.Range("A1").Value = "Resource Utilization"
+    ws.Range("A1").Font.Bold = True
+    ws.Range("A1").Font.Size = 14
+    ws.Range("A1").Interior.Color = RGB(184, 204, 228) ' Light blue background
+
+    ws.Range("A2").Value = "Servers"
+    ws.Range("B2:C2").Merge
+    ws.Range("B2").Value = "Resource Utilization"
+    ws.Range("D2:E2").Merge
+    ws.Range("D2").Value = "Memory Utilization"
+     ' Select cell A1
+  With ws.Range("A1")
+    .HorizontalAlignment = xlCenter
+    .VerticalAlignment = xlCenter
+End With
+
+    ws.Range("B3").Value = "Avg %"
+    ws.Range("C3").Value = "Max %"
+    ws.Range("D3").Value = "Avg %"
+    ws.Range("E3").Value = "Max %"
+
+    ' Format the cells
+    With ws.Range("A2:E2")
+        .Interior.Color = RGB(198, 239, 206) ' Light green background
+        .Font.Bold = True
+    End With
+    
+    With ws.Range("A3:E3")
+        .Font.Bold = True
+        .Interior.Color = RGB(198, 239, 206) ' Light green background
+        .Borders(xlEdgeBottom).LineStyle = xlContinuous
+        .Borders(xlEdgeBottom).Weight = xlThin
+    End With
+
+    ' Set column widths
+    ws.Columns("A").ColumnWidth = 15
+    ws.Columns("B").ColumnWidth = 10
+    ws.Columns("C").ColumnWidth = 10
+    ws.Columns("D").ColumnWidth = 10
+    ws.Columns("E").ColumnWidth = 10
+
+' Clear any existing content in A2 and A3 on Sheet6
+    ws.Range("A2:A3").ClearContents
+    
+    ' Merge cells A2 and A3 on Sheet6
+    ws.Range("A2:A3").Merge
+    
+    ' Set the value of the merged cell to "SERVERS" on Sheet6
+    ws.Range("A2").Value = "SERVERS"
+    
+    ' Center the text horizontally and vertically in the merged cell on Sheet6
+    With ws.Range("A2")
+        .HorizontalAlignment = xlCenter
+        .VerticalAlignment = xlCenter
+    End With
+    
+    ' Add border to the merged cell on Sheet6
+    With ws.Range("A2:A3").Borders
+        .LineStyle = xlContinuous
+        .Weight = xlThin
+    End With
+    
+MsgBox "Processing done, ""Final Output in Sheet3""!", vbInformation
+    
+    ' Set values to the specified cells on Sheet6 (optional)
+    'ws.Range("B2").Value = "ValueB2"
+   'ws.Range("D2").Value = "ValueD2"
+  '  ws.Range("B3").Value = "ValueB3"
+  '  ws.Range("D3").Value = "ValueD3"
+   ' ws.Range("E3").Value = "ValueE3"
+    
+    ' Add borders to the specified cells on Sheet6
+      ' '  With ws.Range("B2, D2").Borders
+      ' .LineStyle = xlContinuous
+      '.Weight = xlThin
+  ' End With
+'
+End Sub
+
+Sub InsertRowsAtBeginningInSheet3()
+    Dim ws As Worksheet
+    ' Set the worksheet to Sheet3
+    Set ws = ThisWorkbook.Sheets("Sheet3")
+    
+    ' Insert three rows at the beginning
+    ws.Rows("1:3").Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
 End Sub
