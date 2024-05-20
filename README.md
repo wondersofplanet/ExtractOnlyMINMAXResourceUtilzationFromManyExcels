@@ -1,1 +1,1 @@
--- from all output vmstat excel files, extract only the Resource Utilization "avg /max"
+-- from all output vmstat excel files, combine and  extract only the Resource Utilization "avg /max"
