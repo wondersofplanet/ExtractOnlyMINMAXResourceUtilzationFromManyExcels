@@ -1,20 +1,37 @@
 Sub aaaCombinedGenerateResourceUtilization()
+
    CopyDataFromOtherExcels
+
    Application.Wait Now + TimeValue("00:00:01")
+
    CopyDataToSheet2
+
    Application.Wait Now + TimeValue("00:00:01")
+
    CopyPastePatternDataInSAMEsheet2
+
    CopyDataAcolumnToSheet3
+
    Application.Wait Now + TimeValue("00:00:01")
+
    CopyDataTOBCDcolumn
+
    Application.Wait Now + TimeValue("00:00:01")
+
    RemoveEXTRATextAndFormatting
+
    Application.Wait Now + TimeValue("00:00:01")
+
    InsertRowsAtBeginningInSheet3
+
    Application.Wait Now + TimeValue("00:00:01")
+
    AddTemplateHeadersInSheet3
+
    Application.Wait Now + TimeValue("00:00:01")
+
    AddBordersToCellinDATArangeSheet3
+
 End Sub
 
 Sub CopyDataFromOtherExcels()
