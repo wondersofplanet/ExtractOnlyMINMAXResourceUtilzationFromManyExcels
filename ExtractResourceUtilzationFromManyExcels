@@ -176,8 +176,8 @@ Sub CopyPastePatternDataInSAMEsheet2()
         ws.Range("E" & i - 1 & ":F" & i - 1).PasteSpecial Paste:=xlPasteValues
         
         ' Copy data from C11 and D11 to F10 and D10
-        ws.Range("C" & i + 6 & ":D" & i + 6).Copy
-        ws.Range("F" & i + 5 & ":D" & i + 5).PasteSpecial Paste:=xlPasteValues
+        ' ws.Range("C" & i + 6 & ":D" & i + 6).Copy
+        ' ws.Range("F" & i + 5 & ":D" & i + 5).PasteSpecial Paste:=xlPasteValues
         
         ' Clear the clipboard
         Application.CutCopyMode = False
